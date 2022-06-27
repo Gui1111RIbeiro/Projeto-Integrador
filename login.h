@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "crypto.h"
-#include "../Animacoes/Funcoes_Anin/term.h"
+#include "../Animacoes/term.h"
 #include "../Listas/structs.h"
 
 //-------------------FUNCIONALIDADES--------------------
