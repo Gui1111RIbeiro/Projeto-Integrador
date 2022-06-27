@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 #include "aluguel.h"
-#include "../Animacoes/term.h"
-#include "../Animacoes/desenharLivro.h"
+#include "../Animacoes/Funcoes_Anin/term.h"
+#include "../Animacoes/Funcoes_Anin/desenharLivro.h"
 #include "../Listas/listaAutor.h"
 #include "../Listas/listaLivro.h"
 #include "../Listas/structs.h"
@@ -99,7 +99,6 @@ void ShowBiblioteca (listaLivro* lista, int pagina, int *totalPagina, int livros
 		fread(&livro, sizeof(Livro), 1, file);
 		if(pagina == pag) PushBack(lista, livro);
 		cod = livro.proximo;
-		
 		contL++;
 		if(contL >= livrosPagina) {
 			contL = 0;
@@ -265,9 +264,9 @@ int Add_Livro (Livro* livro) {
 	
 	Livro aux;
 	aux.codigo = 0;
-	ull codAnterior = cod;
+	ull codAnterior = 0;
 	while(cod){
-		if(feof(file) || cod < quant){
+		if(feof(file) || cod > quant){
 			break;
 		}
 
@@ -280,16 +279,19 @@ int Add_Livro (Livro* livro) {
 		fseek(file, sizeof(Livro)*(cod-1), SEEK_CUR);
 		fread(&aux, sizeof(Livro), 1, file);
 
-
 		char comp = strcmp(livro->titulo, aux.titulo);
 		if(comp == -1 || !comp) break;
 		codAnterior = cod;
 		cod = aux.proximo;
 	}
 
-	if(aux.codigo){
+	if(cod == aux.codigo){
+		if(!codAnterior){
+			fseek(file, tam*sizeof(ull), SEEK_SET);
+			fwrite(&livro->codigo, sizeof(ull), 1, file);
+		}
 		livro->proximo = aux.codigo;
-		if(cod != codAnterior){
+		if(aux.codigo && cod != codAnterior){
 			fsetpos(file, &pos);
 			fseek(file, sizeof(Livro)*(codAnterior-1), SEEK_CUR);
 			fpos_t novaPos;
@@ -299,17 +301,18 @@ int Add_Livro (Livro* livro) {
 			fsetpos(file, &novaPos);
 			fwrite(&aux, sizeof(Livro), 1, file);
 		}
-	}
-
-	if(cod == codAnterior || !aux.codigo){
-		fseek(file, tam*sizeof(ull), SEEK_SET);
-		fwrite(&livro->codigo, sizeof(ull), 1, file);
+	} else {
+		fsetpos(file, &pos);
+		fseek(file, sizeof(Livro)*(aux.codigo-1), SEEK_CUR);
+		aux.proximo = livro->codigo;
+		fwrite(&aux, sizeof(Livro), 1, file);
 	}
 
 	fseek(file, 27*sizeof(ull), SEEK_SET);
 	fwrite(&quant, sizeof(ull), 1, file);
 
 	freopen("Dados/livros.bin", "ab", file);
+	
 	livro->alugado = 0;
 	livro->quantidade = 1;
 	fwrite(livro, sizeof(Livro), 1, file);
