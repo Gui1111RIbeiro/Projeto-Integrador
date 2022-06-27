@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include "crypto.h"
-#include "../Animacoes/Funcoes_Anin/term.h"
+#include "../Animacoes/term.h"
 #include "../Listas/structs.h"
 
 //-------------------FUNCIONALIDADES--------------------
@@ -643,7 +643,7 @@ void PrintCartao (int cartao[16], int data[4], char titular[28], int cvv[3], cha
 	int cont = 0;
 	int i;
 	int j;
-	FILE * fprint = fopen("Animacoes/Textos_Anin/cartao_anin.txt", "rt");
+	FILE * fprint = fopen("Animacoes/cartao_anin.txt", "rt");
 
 	if (!fprint) {
 		printf("Erro na abertura do arquivo\n");
