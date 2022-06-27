@@ -165,6 +165,12 @@ void NumToStr (unsigned long long value, char* str, short base) {
 	}
 	*str = 0;
 	str--;
+	if(!*ini) {
+		*ini = '0';
+		ini++;
+		*ini = 0;
+		return;
+	}
 	char aux;
 
 	while (1){
