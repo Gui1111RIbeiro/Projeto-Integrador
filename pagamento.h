@@ -8,14 +8,14 @@
 #include <unistd.h>
 
 #include "crypto.h"
-#include "../Animacoes/term.h"
+#include "../Animacoes/Funcoes_Anin/term.h"
 #include "../Listas/structs.h"
 
 //-------------------FUNCIONALIDADES--------------------
 
-void AdicionarCartao (User *usuario, char verificador);
+char AdicionarCartao (User *usuario, char verificador);
 void RemoverCartao (User *usuario, int cartao[16], char verificador);
-void MeusCartoes (User *usuario, char verificador);
+char MeusCartoes (User *usuario, char verificador);
 void VerFundos ();
 void PrintCartao (int cartao[16], int data[4], char titular[28], int cvv[3], char erro);
 char ValidarPagamento (User *usuario, int cartao[16]);
@@ -24,7 +24,7 @@ char Checa_mm_aa (int data[4], char check);
 
 //-----------------------FUNÇÕES------------------------
 
-void AdicionarCartao (User *usuario, char verificador) {
+char AdicionarCartao (User *usuario, char verificador) {
 	int data, check, status, j = 0;
 	int cartao_i[16] = {0};
 	int cartao_o[16] = {0};
@@ -77,7 +77,7 @@ void AdicionarCartao (User *usuario, char verificador) {
 			case 1:
 				printf("\nVoltando para o menu...\n");
 				sleep(4);
-				return;
+				return 1;
 		}
 	}
 	FILE * fregistro = fopen("Dados/cartoes.txt", "a");
@@ -88,11 +88,18 @@ void AdicionarCartao (User *usuario, char verificador) {
 		exit(1);
 	}
 	ClearScreen();
+	printf(TC_RST);
 
 	while (j < 17) {
 		PrintCartao(cartao_i, data_i, titular, cvv_i, 'C');
 		ch = getchar();
-	
+
+		if (ch == 27) {
+			if (!kbhit())
+				return 0;
+			getchar();
+			ch = getchar();
+		}
 		if (ch == 10 && j == 16)
 			break;
 		if (j == 0)
@@ -141,6 +148,12 @@ void AdicionarCartao (User *usuario, char verificador) {
 		PrintCartao(cartao_i, data_i, titular, cvv_i,'D');
 		ch = getchar();
 
+		if (ch == 27) {
+			if (!kbhit())
+				return 0;
+			getchar();
+			ch = getchar();
+		}
 		if (ch == 10 && j == 4) {
 			if(!Checa_mm_aa(data_i, 'A')) {
 				for (int i = 0; i < 4; i++)
@@ -172,6 +185,12 @@ void AdicionarCartao (User *usuario, char verificador) {
 		SetCursorPosition(j + 3, 5);
 		ch = getchar();
 
+		if (ch == 27) {
+			if (!kbhit())
+				return 0;
+			getchar();
+			ch = getchar();
+		}
 		if (ch == 10)
 			break;
 		if (ch == 127) {
@@ -199,6 +218,12 @@ void AdicionarCartao (User *usuario, char verificador) {
 		PrintCartao(cartao_i, data_i, titular, cvv_i,'B');
 		ch = getchar();
 
+		if (ch == 27) {
+			if (!kbhit())
+				return 0;
+			getchar();
+			ch = getchar();
+		}
 		if (ch == 10 && j == 3)
 			break;
 		if (ch == 127) {
@@ -246,7 +271,7 @@ void AdicionarCartao (User *usuario, char verificador) {
 	if (verificador == 'A')
 		printf("\nVoltando para o menu...\n");
 	sleep(3);
-	return;
+	return 1;
 }
 
 void RemoverCartao(User *usuario, int cartao[16], char verificador) {
@@ -380,7 +405,7 @@ void RemoverCartao(User *usuario, int cartao[16], char verificador) {
 	}
 }
 
-void MeusCartoes (User *usuario, char verificador) {
+char MeusCartoes (User *usuario, char verificador) {
 	char linha[80] = {0};
 	char *ptr;
 	char cartoes[5][80];
@@ -441,8 +466,9 @@ void MeusCartoes (User *usuario, char verificador) {
 				printf("\nPressione qualquer tecla  para inserir um novo cartão... \n");
 				getchar();
 
-				AdicionarCartao(usuario, 'P');
-				return;
+				if (!AdicionarCartao(usuario, 'P'))
+					return 0;
+				return 1;
 			}
 			do {
 				jump = 0;
@@ -462,16 +488,23 @@ void MeusCartoes (User *usuario, char verificador) {
 						printf(TC_RED);
 					else
 						printf(TC_GRN);
-					while (cartoes[i][0] == 0)
+					while (cartoes[i+jump][0] == 0)
 						jump++;
 					printf("\n   %d - Cartão XXXX-XXXX-XXXX-%d%d%d%d", i+1, cartoes[i+jump][12], cartoes[i+jump][13], cartoes[i+jump][14], cartoes[i+jump][15]);
 				}
 				escolha = getchar();
 
-				if (escolha == 65 && opc > 0)
-					opc--;
-				if (escolha == 66 && opc < cont-1)
-					opc++;
+				if (escolha == 27) {
+					if (!kbhit())
+						return 0;
+					getchar();
+					escolha = getchar();
+					if (escolha == 'A' && opc > 0)
+						opc--;
+					else
+						if (escolha == 'B' && opc < cont-1)
+							opc++;
+				}
 
 			} while (escolha != 10);
 
@@ -483,10 +516,7 @@ void MeusCartoes (User *usuario, char verificador) {
 						opc++;
 				}
 				cartao[i] = cartoes[opc][i];
-				cartoes[opc][i] = 0;
 			}
-			cont--;
-
 			if (verificador == 'P' || verificador == 'R') {
 				printf(TC_GRN);
 				printf("\n\nValidando Pagamento...\n");
@@ -494,6 +524,20 @@ void MeusCartoes (User *usuario, char verificador) {
 				sleep(2);
 
 				status = ValidarPagamento(usuario, cartao);
+				if (status == 3) {
+					opc++;
+					continue;
+				}
+				for (int i = 0; i < 16; i ++) {
+					if (i == 0) {
+						while (cartoes[opc][i] == 0)
+							opc++;
+					}
+					if (cartao[i] == cartoes[opc][i])
+						cartoes[opc][i] = 0;
+				}
+				cont--;
+
 				if (!status) {
 					printf(TC_YEL);
 					printf("\n\nData de validade do cartão vencida!\nRemovendo o cartão vencido...");
@@ -515,6 +559,7 @@ void MeusCartoes (User *usuario, char verificador) {
 
 					if (!fpagar)
 						exit(1);
+					fprintf(fpagar, "%s", usuario->login);
 					if (verificador == 'R')
 						fprintf(fpagar, "%s:", usuario->login);
 					for (int i = 0; i < 16; i++) {
@@ -522,14 +567,14 @@ void MeusCartoes (User *usuario, char verificador) {
 						fprintf(fpagar, "%c", cartoes[opc][i]);
 					}
 					fclose(fpagar);
-					return;
+					return 1;
 				}
 			}
 			else {
 				RemoverCartao(usuario, cartao, 'E');
 				printf("\nVoltando para o menu...\n");
 				sleep(4);
-				return;	
+				return 1;	
 			}
 		}
 	}
@@ -575,14 +620,15 @@ void MeusCartoes (User *usuario, char verificador) {
 				sleep(4);
 				break;
 		}
-		return;
+		return 1;
 	}
 	if ((verificador == 'P' || verificador == 'R') && !cont) {
 		printf(TC_YEL);
 		printf("Nenhum cartão foi encontrado!\nAdicione um novo cartão\n");
-		sleep(4);
-		AdicionarCartao(usuario, 'P');
-		return;
+		sleep(3);
+		if (!AdicionarCartao(usuario, 'P'))
+			return 0;
+		return 1;
 	}
 	printf("\n\nPressione qualquer tecla para voltar... \n");
 	getchar();
@@ -643,7 +689,7 @@ void PrintCartao (int cartao[16], int data[4], char titular[28], int cvv[3], cha
 	int cont = 0;
 	int i;
 	int j;
-	FILE * fprint = fopen("Animacoes/cartao_anin.txt", "rt");
+	FILE * fprint = fopen("Animacoes/Textos_Anin/cartao_anin.txt", "rt");
 
 	if (!fprint) {
 		printf("Erro na abertura do arquivo\n");
@@ -1062,6 +1108,12 @@ char ValidarPagamento (User *usuario, int cartao[16]) {
 			PrintCartao(cartao, data, titular, cvv,'B');
 			ch = getchar();
 
+			if (ch == 27) {
+				if (!kbhit())
+					return 3;
+				getchar();
+				ch = getchar();
+			}
 			if (ch == 10 && j == 3)
 				break;
 			if (ch == 127) {
