@@ -9,9 +9,9 @@
 
 #include "biblioteca.h"
 #include "pagamento.h"
-#include "../Animacoes/Funcoes_Anin/term.h"
+#include "../Animacoes/term.h"
 #include "../Listas/structs.h"
-#include "../Animacoes/Funcoes_Anin/desenharLivro.h"
+#include "../Animacoes/desenharLivro.h"
 
 //-------------------FUNCIONALIDADES--------------------
 
