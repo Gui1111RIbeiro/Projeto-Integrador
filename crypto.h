@@ -7,9 +7,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../Animacoes/Funcoes_Anin/term.h"
-#include "../Listas/structs.h"
-
 typedef unsigned int Word;
 typedef Word* Block;
 
