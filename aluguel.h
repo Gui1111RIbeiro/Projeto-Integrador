@@ -9,13 +9,13 @@
 
 #include "biblioteca.h"
 #include "pagamento.h"
-#include "../Animacoes/term.h"
+#include "../Animacoes/Funcoes_Anin/term.h"
 #include "../Listas/structs.h"
-#include "../Animacoes/desenharLivro.h"
+#include "../Animacoes/Funcoes_Anin/desenharLivro.h"
 
 //-------------------FUNCIONALIDADES--------------------
 
-void AlugarLivro (User *usuario, unsigned long long cod);
+char AlugarLivro (User *usuario, unsigned long long cod);
 void DevolverLivro (User *usuario, unsigned long long cod);
 void RenovarLivro (User *usuario, unsigned long long cod);
 void MeusLivros (User *usuario, char verificador);
@@ -24,13 +24,11 @@ char ChecaAluguel (User *usuario, unsigned long long cod);
 
 //-----------------------FUNÇÕES------------------------
 
-void AlugarLivro (User *usuario, unsigned long long cod) {
+char AlugarLivro (User *usuario, unsigned long long cod) {
 	char escolha;
 	int check = 0;
 	int opc = 0;
 	Livro livro;
-	FILE * fpagamento = fopen("Dados/fundos.txt", "a");
-	livro = BuscarLivroCod(cod);
 
 	struct tm *data;
 
@@ -39,65 +37,6 @@ void AlugarLivro (User *usuario, unsigned long long cod) {
 
 	data = localtime(&segundos);
 
-	if (!fpagamento) {
-		exit(1);
-	}
-	
-	/*
-	do {
-		check = ChecaAluguel(usuario, cod);
-
-		if (!check) {
-			ClearScreen();
-			printf("Você já Alugou o livro %s", livro.titulo);
-			printf("\nPor favor escolha outro!\n");
-			sleep(3);
-			ClearScreen();
-			return;
-		}
-		if (check == 2) {
-			do {
-				SetCursorPosition(1, 1);
-				printf(TC_GRN);
-				printf("Você já têm o máximo de livros alugados!\nDeseja remover algum?\n\n");
-
-				if (!opc) {
-					printf(TC_RED);
-					printf("   SIM\n");
-					printf(TC_GRN);
-					printf("   NÃO\n");
-				}
-				else {
-					printf("   SIM\n");
-					printf(TC_RED);
-					printf("   NÃO\n");
-				}
-				escolha = getchar();
-
-				if (escolha == 65 && opc > 0)
-					opc--;
-				if (escolha == 66 && opc < 1)
-					opc++;
-
-			} while (escolha != 10);
-
-			printf(TC_RST);
-
-			switch (opc) {
-				case 0:
-					MeusLivros(usuario, 'D');
-					printf("\nPressione qualquer tecla para continuar...\n");
-					getchar();
-					check = 1;
-					ClearScreen();
-					break;
-				case 1:
-					printf("\nVoltando para o menu...\n");
-					sleep(4);
-					return;
-			}
-		}
-	} while (!check || check == 2);*/
 	char preco[13] = {0};
 	preco[0] = 'R';
 	preco[1] = '$';
@@ -142,16 +81,17 @@ void AlugarLivro (User *usuario, unsigned long long cod) {
 	} while (escolha != 10);
 
 	if (!opc) {
-		fprintf(fpagamento, "%s:", usuario->login);
-		fclose(fpagamento);
-		MeusCartoes(usuario, 'P');
+		if (!MeusCartoes(usuario, 'P'))
+			return 0;
 	}
 	else {
 		fclose(fpagamento);
-		return;
+		return 0;
 	}
 	FILE * fregistro = fopen("Dados/aluguel.txt", "a");
 	FILE * fpagar = fopen("Dados/fundos.txt", "a");
+
+	if(!fregistro || !fpagar) return -1;
 
 	fprintf(fregistro, "%s:%llu:%i:%i\n", usuario->login, cod, data->tm_yday, data->tm_year+1900);
 
@@ -167,10 +107,11 @@ void AlugarLivro (User *usuario, unsigned long long cod) {
 	LoadText();
 	DrawTextSpace('r');
 	DrawTextSpace('r');
-	DrawTextRight("Sucesso.", TC_YEL);
+	DrawTextRight("Livro alugado.", TC_YEL);
 	DrawEnd();
 	sleep(3);
-	return;
+	AnimLivro('e');
+	return 1;
 }
 
 void DevolverLivro (User *usuario, unsigned long long cod) {
