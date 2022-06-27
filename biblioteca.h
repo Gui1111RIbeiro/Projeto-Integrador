@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 #include "aluguel.h"
-#include "../Animacoes/Funcoes_Anin/term.h"
-#include "../Animacoes/Funcoes_Anin/desenharLivro.h"
+#include "../Animacoes/term.h"
+#include "../Animacoes/desenharLivro.h"
 #include "../Listas/listaAutor.h"
 #include "../Listas/listaLivro.h"
 #include "../Listas/structs.h"
