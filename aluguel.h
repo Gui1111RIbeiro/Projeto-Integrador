@@ -83,11 +83,8 @@ char AlugarLivro (User *usuario, unsigned long long cod) {
 	if (!opc) {
 		if (!MeusCartoes(usuario, 'P'))
 			return 0;
-	}
-	else {
-		fclose(fpagamento);
-		return 0;
-	}
+	} else return 0;
+
 	FILE * fregistro = fopen("Dados/aluguel.txt", "a");
 	FILE * fpagar = fopen("Dados/fundos.txt", "a");
 
