@@ -282,16 +282,16 @@ void AnimLivro (char check) {
 	FILE* fleitura;
 
 	if (check == 'E' || check == 'e') {
-		fleitura = fopen("Animacoes/Textos_Anin/livro_pg_esq_anin.txt", "r");
+		fleitura = fopen("Animacoes/livro_pg_esq_anin.txt", "r");
 	} 
 	if (check == 'd' || check == 'D') {
-		fleitura = fopen("Animacoes/Textos_Anin/livro_pg_dir_anin.txt", "r");
+		fleitura = fopen("Animacoes/livro_pg_dir_anin.txt", "r");
 	}
 	if (check == 'A' || check == 'a') {
-		fleitura = fopen("Animacoes/Textos_Anin/livro_abre_anin.txt", "r");
+		fleitura = fopen("Animacoes/livro_abre_anin.txt", "r");
 	} 
 	if (check == 'F' || check == 'f') {
-		fleitura = fopen("Animacoes/Textos_Anin/livro_fecha_anin.txt", "r");
+		fleitura = fopen("Animacoes/livro_fecha_anin.txt", "r");
 	}
 	if (!fleitura) {
 		printf("Erro na abertura do arquivo\n");
